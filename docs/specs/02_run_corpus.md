@@ -1,6 +1,6 @@
 # Especificación 02. Recorrer el corpus entero
 
-Estado: propuesta para revisión de Michel. Si la apruebas, se copia a `docs/decisions/` y se empieza a programar.
+Estado: la decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`. El resto de la especificación queda a la espera de que Michel pida la programación.
 
 ## Para qué existe
 
