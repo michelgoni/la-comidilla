@@ -1,0 +1,16 @@
+# Private data: third-party reviews, hand-made marks and run outputs.
+# Never published: the corpus is copied from Google Maps and the marking
+# sheet holds the texts of real reviews.
+data/
+labelled/
+
+# Secrets. The API key lives outside this folder.
+*.env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# OS
+.DS_Store

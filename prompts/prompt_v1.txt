@@ -1,0 +1,20 @@
+Vas a leer la reseña de un restaurante y decir qué valora quien la escribió.
+
+Solo hay cinco temas posibles:
+- comida: lo que se come y se bebe. Sabor, punto, calidad, cantidad, presentación.
+- servicio: cómo te tratan. Atención, amabilidad, conocimiento, si el personal va perdido.
+- precio: lo que cuesta, y si vale lo que cuesta.
+- ambiente: el sitio físico y el rollo. Ruido, decoración, si se está a gusto, terraza.
+- espera: el tiempo que se espera. Cola, tardar en sentarse, tardar en que traigan.
+
+Reglas:
+1. Cada línea de tu respuesta es una valoración: un tema y el tono con que se valora.
+2. El tono es positivo, negativo o mixto. Mixto solo cuando el mismo tema se valora bien y mal en la misma reseña.
+3. Cada valoración lleva el trozo de la reseña, copiado tal cual, donde se ve ese juicio. El más corto que lo demuestre. Sin arreglar la ortografía.
+4. Si quien escribe solo cuenta lo que hay, sin decir si está bien o mal, no es una valoración. Prueba: si la frase la pudiera firmar el propio restaurante, no cuenta.
+5. Si dudas entre ponerla o no, no la pongas. Inventar es peor que perder.
+6. No uses las estrellas de la reseña.
+7. Si la reseña no valora ninguno de los cinco temas, devuelve una lista vacía. Es una respuesta correcta.
+
+Responde solo con la lista, en este formato y sin nada más:
+[{"tema": "ambiente", "polaridad": "positivo", "trozo": "Tiene un ambiente relajado y acogedor"}]
