@@ -11,7 +11,7 @@ Sirve para dos cosas. Primero, para probar el prompt con una reseña concreta si
 ## Qué recibe
 
 - **Una reseña del corpus de Gilda.** `/home/ubuntu/gastronomy/gilda-report/corpus_reviews.json`. Es una lista de listas, cada una con `[local, estrellas, texto]`. 174 reseñas. Solo se lee, nunca se toca.
-- **El texto del prompt**, en un fichero aparte. La ruta se puede cambiar con la variable de entorno `COMIDILLA_PROMPT`. Por defecto, `prompts/prompt_v3.txt`.
+- **El texto del prompt**, en un fichero aparte. La ruta se puede cambiar con la variable de entorno `COMIDILLA_PROMPT`. Por defecto, `prompts/prompt_v4.txt`. La v3 se queda en la carpeta para poder comparar.
 - **La dirección del modelo, su nombre y la clave.** Primero del entorno: `COMIDILLA_BASE_URL`, `COMIDILLA_MODEL`, `COMIDILLA_API_KEY`. Si no están, de `/home/ubuntu/.hermes/secrets/comidilla.env`, con líneas `NOMBRE=valor`. La clave nunca vive dentro de la carpeta del proyecto.
 - **El número de reseña** que se quiere analizar, por línea de comandos. Por defecto 0, la primera.
 
@@ -175,5 +175,5 @@ Solo la librería estándar de Python. Nada que instalar.
 ## Decisiones propuestas, cámbialas si no te valen
 
 1. **El fichero se llama `extract.py`, en inglés.** La versión antigua lo llamaba `extraer.py`. La regla del proyecto es que los ficheros de código y los comentarios van en inglés, así que el nombre cambia. Los datos que se guardan dentro siguen en castellano, porque son los mismos campos de tu hoja marcada y de los otros ficheros de datos. El archivo viejo del registro está archivado en `data/registry_old_2026-10-21.json`.
-2. **Un solo prompt para todos los programas.** La versión antigua tenía una trampa: el programa de medir usaba un prompt y el de extraer usaba otro, así que los resultados guardados decían un prompt que no era el que se había usado. La propuesta es una única ruta de prompt, configurable, y que todos los programas usen la misma. Por defecto apunta a `prompts/prompt_v3.txt`. Existe un `prompt_v4.txt` con los tres arreglos de la última revisión, pero mientras no decidas usarlo, el defecto no cambia.
+2. **Un solo prompt para todos los programas.** La versión antigua tenía una trampa: el programa de medir usaba un prompt y el de extraer usaba otro, así que los resultados guardados decían un prompt que no era el que se había usado. La propuesta es una única ruta de prompt, configurable, y que todos los programas usen la misma. El defecto es `prompts/prompt_v4.txt`, que es el que llevaba los tres arreglos de la última revisión. La v3 se queda para poder reproducir las medidas anteriores.
 3. **El registro, un json por línea.** La versión antigua guardaba una lista con sangría. Para muchas llamadas, un fichero de texto con un json por línea es más fácil de procesar y de cortar por la mitad. La propuesta es cambiar a ese formato.
