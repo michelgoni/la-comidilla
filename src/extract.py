@@ -138,7 +138,7 @@ def build_payload(model: str, prompt: str, review_text: str) -> dict:
     """Build the request body; keep it separate so it can be checked."""
     return {
         "model": model,
-        "temperature": 2,
+        "temperature": 0,
         "messages": [
             {"role": "system", "content": prompt},
             {
