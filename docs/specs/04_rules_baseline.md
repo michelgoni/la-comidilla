@@ -96,3 +96,11 @@ Este es el léxico exacto que se usó para medir. Se escribió de una vez y no s
 - Pistas: `espera|esperar|esperamos|cola|tard|minutos|lent`
 - Elogio: `al momento|sin esperar|no esperamos|enseguida|r[aá]pid|inmediat`
 - Queja: `esperamos|tard|cola|minutos de espera|lent|nos tuvieron|media hora|se hizo largo|bastante tiempo`
+
+## Cómo se trabaja esta especificación
+
+- El trabajo va en la rama `spec-04-rules-baseline`, nunca directamente sobre `main`.
+- Se abre una pull request contra `main` cuando la rama está lista.
+- GitHub ejecuta las pruebas solo, en cada pull request. Si alguna falla, no se fusiona.
+- Solo se fusiona con las pruebas en verde y con el visto bueno de Michel.
+- El método completo, con los comandos, está en `docs/working-method.md`.

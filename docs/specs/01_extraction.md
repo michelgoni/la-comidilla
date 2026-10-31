@@ -177,3 +177,11 @@ Solo la librería estándar de Python. Nada que instalar.
 1. **El fichero se llama `extract.py`, en inglés.** La versión antigua lo llamaba `extraer.py`. La regla del proyecto es que los ficheros de código y los comentarios van en inglés, así que el nombre cambia. Los datos que se guardan dentro siguen en castellano, porque son los mismos campos de tu hoja marcada y de los otros ficheros de datos. El archivo viejo del registro está archivado en `data/registry_old_2026-10-21.json`.
 2. **Un solo prompt para todos los programas.** La versión antigua tenía una trampa: el programa de medir usaba un prompt y el de extraer usaba otro, así que los resultados guardados decían un prompt que no era el que se había usado. La propuesta es una única ruta de prompt, configurable, y que todos los programas usen la misma. El defecto es `prompts/prompt_v4.txt`, que es el que llevaba los tres arreglos de la última revisión. La v3 se queda para poder reproducir las medidas anteriores.
 3. **El registro, un json por línea.** La versión antigua guardaba una lista con sangría. Para muchas llamadas, un fichero de texto con un json por línea es más fácil de procesar y de cortar por la mitad. La propuesta es cambiar a ese formato.
+
+## Cómo se trabaja esta especificación
+
+- El trabajo va en la rama `spec-01-extraction`, nunca directamente sobre `main`.
+- Se abre una pull request contra `main` cuando la rama está lista.
+- GitHub ejecuta las pruebas solo, en cada pull request. Si alguna falla, no se fusiona.
+- Solo se fusiona con las pruebas en verde y con el visto bueno de Michel.
+- El método completo, con los comandos, está en `docs/working-method.md`.

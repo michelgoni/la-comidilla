@@ -1,0 +1,33 @@
+# Run the test suite on every pull request and on every push to main.
+# A red suite blocks the merge. See AGENTS.md, "How work moves in git".
+
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show the Python version
+        run: python3 --version
+
+      - name: Run the test suite
+        run: python3 -m unittest discover -s tests -v
