@@ -1,6 +1,6 @@
 # Especificación 02. Recorrer el corpus entero
 
-Estado: la decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`. El resto de la especificación queda a la espera de que Michel pida la programación.
+Estado: aprobada el 1 de noviembre de 2026. La decisión está en `docs/decisions/02_run_corpus.md`. La decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`.
 
 ## Para qué existe
 
