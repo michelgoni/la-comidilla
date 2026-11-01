@@ -159,6 +159,8 @@ def call_model(
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}",
         "X-Session-Id": os.urandom(8).hex(),
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+        "x-opencode-session": "comidilla",
     }
     request = urllib.request.Request(
         url, data=body, headers=headers, method="POST"

@@ -25,13 +25,22 @@ def model_answer(content: str) -> str:
 
 
 @contextmanager
-def fake_server(body: str, status: int = 200):
+def fake_server(body: str, status: int = 200, headers_seen: list = None):
     """Run a local HTTP server that always returns the same body."""
 
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self) -> None:
             length = int(self.headers.get("Content-Length", "0"))
             self.rfile.read(length)
+            if headers_seen is not None:
+                headers_seen.append(
+                    {
+                        "User-Agent": self.headers.get("User-Agent", ""),
+                        "x-opencode-session": self.headers.get(
+                            "x-opencode-session", ""
+                        ),
+                    }
+                )
             data = body.encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
@@ -269,6 +278,19 @@ class ModelCallTests(unittest.TestCase):
             )
         self.assertEqual(answer, '[{"tema": "comida"}]')
         self.assertGreaterEqual(milliseconds, 0)
+
+    def test_call_sends_browser_and_session_headers(self) -> None:
+        headers_seen = []
+        with fake_server(
+            model_answer("[]"), headers_seen=headers_seen
+        ) as base_url:
+            extract.call_model(
+                base_url, "", extract.build_payload("modelo", "Prompt", "Texto")
+            )
+
+        self.assertEqual(len(headers_seen), 1)
+        self.assertTrue(headers_seen[0]["User-Agent"].startswith("Mozilla/5.0"))
+        self.assertEqual(headers_seen[0]["x-opencode-session"], "comidilla")
 
     def test_http_error_shows_code_and_body(self) -> None:
         with fake_server('{"error": "roto"}', status=500) as base_url:
