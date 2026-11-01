@@ -154,6 +154,59 @@ class CompareTests(unittest.TestCase):
         self.assertEqual(counts, Counter({("comida", "coral"): 1}))
 
 
+class PairCompareTests(unittest.TestCase):
+    """The headline counts each pair once per review, not each row."""
+
+    def test_repeats_collapse_to_one_pair(self) -> None:
+        mine = [{"tema": "comida", "polaridad": "negativo", "trozo": "x"}]
+        model_judgments = [
+            {"tema": "comida", "polaridad": "negativo", "trozo": "a"},
+            {"tema": "comida", "polaridad": "negativo", "trozo": "b"},
+            {"tema": "comida", "polaridad": "negativo", "trozo": "c"},
+        ]
+
+        comparison = measure.compare_pairs(mine, model_judgments)
+
+        self.assertEqual(comparison["aciertos"], 1)
+        self.assertEqual(comparison["inventadas"], 0)
+        self.assertEqual(comparison["omitidas"], 0)
+
+    def test_another_polarity_is_one_invented_and_one_missed(self) -> None:
+        mine = [{"tema": "comida", "polaridad": "mixto", "trozo": "x"}]
+        model_judgments = [
+            {"tema": "comida", "polaridad": "negativo", "trozo": "x"}
+        ]
+
+        comparison = measure.compare_pairs(mine, model_judgments)
+
+        self.assertEqual(comparison["aciertos"], 0)
+        self.assertEqual(comparison["inventadas"], 1)
+        self.assertEqual(comparison["omitidas"], 1)
+
+    def test_pair_set_ignores_entries_that_are_not_objects(self) -> None:
+        judgments = [
+            {"tema": "comida", "polaridad": "positivo"},
+            {"tema": "comida", "polaridad": "positivo"},
+            "no soy un juicio",
+        ]
+
+        self.assertEqual(measure.pair_set(judgments), {("comida", "positivo")})
+
+    def test_the_same_pair_counts_once_per_review(self) -> None:
+        judged = {"tema": "comida", "polaridad": "negativo", "trozo": "x"}
+        measured = [
+            {"mias": [judged, judged], "del_modelo": [judged]},
+            {"mias": [judged], "del_modelo": [judged, judged]},
+        ]
+
+        hits, model_pairs, own_pairs, invented, missed = (
+            measure.pair_totals(measured)
+        )
+
+        self.assertEqual((hits, model_pairs, own_pairs), (2, 2, 2))
+        self.assertEqual((invented, missed), (0, 0))
+
+
 class MeasureTests(unittest.TestCase):
     """The meter measures the sheet, resumes and survives bad answers."""
 
@@ -226,6 +279,9 @@ class MeasureTests(unittest.TestCase):
         self.assertEqual(entry["modelo"], "modelo-de-prueba")
         self.assertIn("Precisión: 0.500", printed)
         self.assertIn("recuerdo: 0.500", printed)
+        self.assertIn("Por pareja (lo que decide)", printed)
+        self.assertIn("Por veces (ruido)", printed)
+        self.assertIn("Repetición:", printed)
         self.assertIn("Lo que más inventa: precio / negativo", printed)
         self.assertIn("Lo que más se deja: servicio / negativo", printed)
 

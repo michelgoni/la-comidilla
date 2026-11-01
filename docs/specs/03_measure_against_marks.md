@@ -16,24 +16,26 @@ Sin este programa no hay forma de decir si el proyecto funciona. Los números qu
 
 ## Qué devuelve
 
-1. **`labelled/result_marked.jsonl`.** Un json por línea, una línea por reseña. Campos: numero, local, estrellas, mias (tus juicios), del_modelo (los del modelo), avisos (problemas de forma), comparacion (aciertos, inventadas, omitidas), respuesta_cruda, milisegundos, modelo, prompt y fecha. Si se corta, al volver a lanzarlo salta las reseñas que ya están en este fichero.
-2. **Por pantalla, al final, un resumen:**
-   - Reseñas medidas.
-   - Juicios tuyos y juicios del modelo.
-   - Aciertos, contando tema y tono.
-   - Precisión: de lo que saca el modelo, cuánto está bien.
-   - Recuerdo: de lo que hay en tus marcas, cuánto encuentra.
+1. **`labelled/result_marked.jsonl`.** Un json por línea, una línea por reseña. Campos: numero, local, estrellas, mias (tus juicios), del_modelo (los del modelo), avisos (problemas de forma), comparacion (aciertos, inventadas, omitidas contando cada fila), comparacion_parejas (los mismos tres números contando cada pareja una vez por reseña), respuesta_cruda, milisegundos, modelo, prompt y fecha. Si se corta, al volver a lanzarlo salta las reseñas que ya están en este fichero.
+2. **Por pantalla, al final, un resumen en dos bloques:**
+   - **Por pareja, que es el titular.** Aciertos, precisión y recuerdo contando cada pareja de tema y tono una sola vez por reseña, más las inventadas y las omitidas.
+   - **Por veces, que mide el ruido.** Los mismos números contando cada fila del modelo, más la repetición: cuántas filas gasta para cuántas parejas distintas.
    - Avisos de forma.
    - Reseñas que el modelo dejó vacías sin serlo.
-   - Lo que más inventa y lo que más se deja, por tema y tono.
+   - Lo que más inventa y lo que más se deja, por tema y tono, contando por pareja.
 
 ## Cómo se compara
 
 La comparación es por pareja de tema y tono. No se compara el trozo. Es decir, si tú marcaste `comida / negativo` y el modelo devuelve `comida / negativo` con otro trozo, cuenta como acierto. El trozo se revisa aparte, como aviso de forma.
 
-El conteo es por número de veces. Si una reseña tiene dos juicios `comida / negativo`, cuenta dos. Se usan dos contadores: uno con tus parejas y otro con las del modelo. Los aciertos son la intersección. Las inventadas son lo que está en el modelo y no en tus marcas. Las omitidas son lo que está en tus marcas y no en el modelo.
+Se cuentan dos cosas, y las dos se enseñan:
 
-La precisión se calcula dividiendo los aciertos entre el total de juicios del modelo. El recuerdo, dividiendo los aciertos entre el total de tus juicios. Si el total es cero, se enseña `no aplica` en vez de dividir por cero.
+- **Por pareja, que es el titular.** En cada reseña se miran las parejas distintas. Si el modelo repite tres veces `servicio / negativo` y tú lo marcaste una, hay una pareja y un acierto, no tres. Los aciertos son las parejas que están en los dos lados. Las inventadas son las que están en el modelo y no en tus marcas. Las omitidas, al revés.
+- **Por veces, que mide el ruido.** Se cuenta cada fila del modelo. Tres filas de la misma pareja son tres. Mide cuánto ocupa la respuesta, y se informa aparte para no esconderlo.
+
+La precisión se calcula dividiendo los aciertos entre lo que hay en el lado del modelo. El recuerdo, dividiendo los aciertos entre lo que hay en tus marcas. Se calculan y se enseñan con los dos contadores. Si un total es cero, se enseña `no aplica` en vez de dividir por cero.
+
+El motivo de que el titular sea el de parejas: tu hoja marca una vez por tema y tono, y el prompt pide una fila por juicio. Contar por veces castiga al modelo por cumplir el prompt y hace que dos medidas del mismo modelo no se puedan comparar. Decidido el 1 de noviembre de 2026, en `docs/decisions/06_pair_metric.md`.
 
 ## Cómo funciona, paso a paso
 
@@ -69,6 +71,7 @@ Con un servidor falso y una hoja de prueba de tres reseñas.
 3. **Retomar.** Se lanza, se corta, se vuelve a lanzar. No repite las reseñas que ya están en el fichero.
 4. **Trozo inventado.** El modelo devuelve un juicio con un trozo que no está en la reseña. El juicio cuenta para la comparación, pero se apunta el aviso.
 5. **Hoja sin marcar.** Ninguna reseña con `marcada` en verdadero. El programa para con un mensaje claro.
+6. **Repeticiones.** El modelo devuelve tres veces la misma pareja en una reseña y tú la marcaste una. Por pareja: un acierto y cero inventadas. Por veces: un acierto y dos inventadas. Las dos cuentas salen en el resumen, cada una en su bloque.
 
 ## Dependencias
 

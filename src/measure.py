@@ -119,6 +119,29 @@ def show_pair(pair: tuple) -> str:
     return f"{pair[0]} / {pair[1]}"
 
 
+def pair_set(judgments: list) -> set:
+    """Return the pairs in the list, with no pair repeated."""
+    pairs = set()
+    for judgment in judgments:
+        if not isinstance(judgment, dict):
+            continue
+        pairs.add(
+            (str(judgment.get("tema")), str(judgment.get("polaridad")))
+        )
+    return pairs
+
+
+def compare_pairs(mine: list, model_judgments: list) -> dict:
+    """Compare by pair: each pair counts once per review, not by rows."""
+    mine_pairs = pair_set(mine)
+    model_pairs = pair_set(model_judgments)
+    return {
+        "aciertos": len(mine_pairs & model_pairs),
+        "inventadas": len(model_pairs - mine_pairs),
+        "omitidas": len(mine_pairs - model_pairs),
+    }
+
+
 def compare(mine: list, model_judgments: list) -> dict:
     """Compare by pair and count hits, invented and missed judgements."""
     mine_counts = pair_counts(mine)
@@ -154,6 +177,7 @@ def build_entry(
         "del_modelo": judgments,
         "avisos": problems,
         "comparacion": compare(mine, judgments),
+        "comparacion_parejas": compare_pairs(mine, judgments),
         "respuesta_cruda": raw[:RAW_ANSWER_LIMIT],
         "milisegundos": milliseconds,
         "modelo": model,
@@ -194,8 +218,8 @@ def measure_review(config: dict, prompt: str, marked_review: dict) -> tuple:
 def pair_differences(entries: dict, marked: list) -> dict:
     """Add up per pair the judgements the model invented and missed.
 
-    The entries only carry totals, so the pairs come again from the two
-    judgement lists of every marked review that has been measured.
+    It counts by pair, the same way the headline of the summary counts,
+    so the top of each list matches the numbers above it.
     """
     invented = Counter()
     missed = Counter()
@@ -204,10 +228,10 @@ def pair_differences(entries: dict, marked: list) -> dict:
         entry = entries.get(review["numero"])
         if not entry:
             continue
-        mine_counts = pair_counts(entry.get("mias", []))
-        model_counts = pair_counts(entry.get("del_modelo", []))
-        invented += model_counts - mine_counts
-        missed += mine_counts - model_counts
+        mine_pairs = pair_set(entry.get("mias", []))
+        model_pairs = pair_set(entry.get("del_modelo", []))
+        invented.update(model_pairs - mine_pairs)
+        missed.update(mine_pairs - model_pairs)
 
     return {
         "invented": invented,
@@ -221,6 +245,34 @@ def most_common(counter: Counter) -> tuple:
         return None
     pair, count = counter.most_common(1)[0]
     return show_pair(pair), count
+
+
+def format_ratio(hits: int, total: int) -> str:
+    """Return the ratio with three decimals, or a word when it cannot be."""
+    return f"{hits / total:.3f}" if total else "no aplica"
+
+
+def format_rows(rows: int, pairs: int) -> str:
+    """Return how many rows the model spends per distinct pair."""
+    return f"{rows / pairs:.2f}" if pairs else "no aplica"
+
+
+def pair_totals(measured: list) -> tuple:
+    """Add up the pair counter over the measured reviews.
+
+    Returns hits, model pairs, own pairs, invented pairs and missed
+    pairs, so the summary reads every pair number in one pass.
+    """
+    hits = model_pairs = own_pairs = invented = missed = 0
+    for entry in measured:
+        mine = pair_set(entry.get("mias", []))
+        other = pair_set(entry.get("del_modelo", []))
+        hits += len(mine & other)
+        invented += len(other - mine)
+        missed += len(mine - other)
+        model_pairs += len(other)
+        own_pairs += len(mine)
+    return hits, model_pairs, own_pairs, invented, missed
 
 
 def show_summary(entries: dict, marked: list) -> None:
@@ -239,10 +291,9 @@ def show_summary(entries: dict, marked: list) -> None:
     inventadas = sum(entry["comparacion"]["inventadas"] for entry in measured)
     omitidas = sum(entry["comparacion"]["omitidas"] for entry in measured)
 
-    precision = (
-        f"{aciertos / model_total:.3f}" if model_total else "no aplica"
+    pair_hits, model_pairs, own_pairs, invented_pairs, missed_pairs = (
+        pair_totals(measured)
     )
-    recall = f"{aciertos / mine_total:.3f}" if mine_total else "no aplica"
 
     avisos_total = sum(len(entry.get("avisos", [])) for entry in measured)
     empty_implies_missed = sum(
@@ -258,9 +309,29 @@ def show_summary(entries: dict, marked: list) -> None:
     print("Resumen del examen")
     print(f"- Reseñas medidas: {len(measured)}")
     print(f"- Juicios tuyos: {mine_total} | juicios del modelo: {model_total}")
-    print(f"- Aciertos (tema y tono): {aciertos}")
-    print(f"- Precisión: {precision} | recuerdo: {recall}")
-    print(f"- Inventados: {inventadas} | omitidos: {omitidas}")
+    print()
+    print("Por pareja (lo que decide)")
+    print(f"- Aciertos (tema y tono): {pair_hits}")
+    print(
+        f"- Precisión: {format_ratio(pair_hits, model_pairs)} | "
+        f"recuerdo: {format_ratio(pair_hits, own_pairs)}"
+    )
+    print(f"- Inventadas: {invented_pairs} | omitidas: {missed_pairs}")
+    print()
+    print("Por veces (ruido)")
+    print(
+        f"- Aciertos: {aciertos} | inventadas: {inventadas} | "
+        f"omitidas: {omitidas}"
+    )
+    print(
+        f"- Precisión: {format_ratio(aciertos, model_total)} | "
+        f"recuerdo: {format_ratio(aciertos, mine_total)}"
+    )
+    print(
+        f"- Repetición: {model_total} filas para {model_pairs} parejas, "
+        f"{format_rows(model_total, model_pairs)} filas por pareja"
+    )
+    print()
     print(f"- Avisos de forma: {avisos_total}")
     print(
         f"- Reseñas que el modelo dejó vacías sin serlo: "
@@ -313,11 +384,12 @@ def run() -> None:
             )
             write_entry(result_file, entry)
             saved[review["numero"]] = entry
+            pairs = entry["comparacion_parejas"]
             print(
                 f"  Reseña {review['numero']} ({review['local']}): "
-                f"{entry['comparacion']['aciertos']} aciertos | "
-                f"{entry['comparacion']['inventadas']} inventadas | "
-                f"{entry['comparacion']['omitidas']} omitidas"
+                f"{pairs['aciertos']} aciertos | "
+                f"{pairs['inventadas']} inventadas | "
+                f"{pairs['omitidas']} omitidas"
             )
 
     show_summary(saved, marked)
