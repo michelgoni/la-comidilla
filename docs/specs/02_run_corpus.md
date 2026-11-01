@@ -1,6 +1,6 @@
 # Especificación 02. Recorrer el corpus entero
 
-Estado: aprobada el 1 de noviembre de 2026. La decisión está en `docs/decisions/02_run_corpus.md`. La decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`.
+Estado: aprobada el 1 de noviembre de 2026. La decisión está en `docs/decisions/02_run_corpus.md`. La decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`. Amendada el 1 de noviembre de 2026 con la opción `--reintentar-fallidas`, cuya decisión está en `docs/decisions/03_retry_failed.md`.
 
 ## Para qué existe
 
@@ -12,7 +12,7 @@ No piensa nada nuevo. Toda la conversación con el modelo la hace el programa de
 
 - **Un fichero de reseñas.** Por defecto `data/full_corpus.json`, que tiene 1.173 reseñas con la forma `[local, estrellas, texto]`. La ruta se puede cambiar con la opción `--corpus`.
 - **La configuración del modelo y el prompt**, igual que el programa de la especificación 01. Se leen del entorno o de `/home/ubuntu/.hermes/secrets/comidilla.env`.
-- **Opciones por línea de comandos:** desde qué número empezar, hasta qué número llegar y cuántos reintentos hacer por reseña.
+- **Opciones por línea de comandos:** desde qué número empezar, hasta qué número llegar, cuántos reintentos hacer por reseña y si se vuelven a pasar las reseñas que acabaron con error.
 
 ## Qué devuelve
 
@@ -24,9 +24,9 @@ No piensa nada nuevo. Toda la conversación con el modelo la hace el programa de
 
 1. Lee la configuración y el prompt. Si falta algo, para con un mensaje claro.
 2. Carga el fichero de reseñas. Comprueba que es una lista no vacía.
-3. Mira si el fichero de salida ya existe. Si existe, lee todas las líneas y apunta los números de reseña que ya están hechos. Esa es la memoria para retomar.
+3. Mira si el fichero de salida ya existe. Si existe, lee todas las líneas y apunta los números de reseña que ya están hechos. Esa es la memoria para retomar. Si se pidió `--reintentar-fallidas`, las líneas con error no cuentan como hechas: esas reseñas vuelven a la lista de pendientes.
 4. Calcula qué números faltan entre el principio y el final pedidos. Los que ya están hechos se saltan sin llamar al modelo.
-5. Abre el fichero de salida y el de errores en modo añadir. No borra lo que ya había.
+5. Abre el fichero de salida y el de errores en modo añadir. No borra lo que ya había. Solo si se pidió `--reintentar-fallidas`, quita antes del pase las líneas con error de las reseñas que se repasan; su historial ya está en el fichero de errores, que nunca se borra.
 6. Para cada reseña pendiente: prepara el mensaje, llama al modelo con reintentos, revisa la forma de la respuesta y escribe una línea. Si hubo error, escribe también la línea en el fichero de errores.
 7. Si el modelo falla, espera un poco antes de reintentar. La espera crece con cada intento: 2 segundos, 4, 6. Si se agotan los reintentos, apunta el fallo y sigue con la siguiente. Un fallo no para el recorrido.
 8. Al final, cierra los ficheros y enseña el resumen.
@@ -44,13 +44,14 @@ python3 src/run_corpus.py                          (todas las que falten)
 python3 src/run_corpus.py --desde 0 --hasta 20      (solo las veinte primeras)
 python3 src/run_corpus.py --reintentos 3            (tres reintentos por fallo)
 python3 src/run_corpus.py --corpus otro.json        (otro fichero de reseñas)
+python3 src/run_corpus.py --reintentar-fallidas     (repetir las que fallaron)
 ```
 
 ## Lo que no hace
 
 - No mide la calidad. Solo guarda lo que el modelo devuelve. La medición es otro programa.
 - No cambia el prompt ni el modelo por su cuenta. Usa lo que le digan.
-- No borra resultados anteriores. Si una reseña ya está hecha, la salta.
+- No borra resultados anteriores. Si una reseña ya está hecha, la salta. La única excepción es `--reintentar-fallidas`: quita del fichero de resultados las líneas con error de las reseñas que se repasan, porque su historial ya está en el fichero de errores.
 - No para el recorrido por un fallo. Lo apunta y sigue.
 
 ## Cómo se comprueba que funciona
@@ -62,6 +63,7 @@ Con un servidor falso y cinco reseñas de prueba.
 3. **Fallo y reintento.** El servidor falso falla las dos primeras veces y acierta la tercera. Con `--reintentos 2`, la reseña acaba bien. Si se agotan los reintentos, la reseña aparece en el fichero de errores y el recorrido sigue.
 4. **Rango.** Con `--desde 2 --hasta 4` solo procesa las reseñas 2 y 3. La 4 no entra, porque el final no se incluye.
 5. **Sin configuración.** Para con un mensaje claro y no escribe nada.
+6. **Repetir las fallidas.** El resultado guarda tres reseñas: dos sin error y una con error. Con `--reintentar-fallidas`, solo repasa la del error y el fichero sigue teniendo una línea por reseña, sin números repetidos. Si la reseña repetida vuelve a fallar, queda una sola línea y el fichero de errores crece. Sin la opción, la del error cuenta como hecha y no se repasa nada. Con `--desde` y `--hasta`, las fallidas fuera del rango se quedan como están.
 
 ## Dependencias
 
