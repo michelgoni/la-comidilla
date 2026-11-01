@@ -2,7 +2,7 @@
 
 Fecha: 1 de noviembre de 2026.
 
-Se aprueba la especificación `docs/specs/02_run_corpus.md` y se implementa en `src/correr_corpus.py`, con sus pruebas en `tests/test_run_corpus.py`.
+Se aprueba la especificación `docs/specs/02_run_corpus.md` y se implementa en `src/run_corpus.py`, con sus pruebas en `tests/test_run_corpus.py`.
 
 Motivo: Michel pidió implementar la especificación. La propuesta ya describía el programa completo, así que no se añaden reglas nuevas.
 
@@ -10,7 +10,7 @@ Se mantienen las decisiones que ya estaban escritas:
 
 1. Los resultados van a `labelled/result_corpus.jsonl` y los fallos a `labelled/errors_corpus.jsonl`, un json por línea, según la decisión `docs/decisions/02_format_jsonl.md`.
 2. Toda la conversación con el modelo la sigue haciendo `src/extract.py`. El programa que recorre el corpus lo importa y no repite la llamada, la limpieza ni la revisión de forma.
-3. El fichero se llama `src/correr_corpus.py`, como pide la especificación, para que los comandos escritos en ella funcionen tal cual.
+3. El fichero se llama `src/run_corpus.py`, en inglés, siguiendo la regla del proyecto. Los comandos de la especificación se actualizan con ese nombre.
 
 Dos detalles que la especificación no fijaba y quedan así:
 

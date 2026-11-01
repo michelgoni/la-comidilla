@@ -40,10 +40,10 @@ No piensa nada nuevo. Toda la conversación con el modelo la hace el programa de
 ## Línea de comandos
 
 ```
-python3 src/correr_corpus.py                          (todas las que falten)
-python3 src/correr_corpus.py --desde 0 --hasta 20      (solo las veinte primeras)
-python3 src/correr_corpus.py --reintentos 3            (tres reintentos por fallo)
-python3 src/correr_corpus.py --corpus otro.json        (otro fichero de reseñas)
+python3 src/run_corpus.py                          (todas las que falten)
+python3 src/run_corpus.py --desde 0 --hasta 20      (solo las veinte primeras)
+python3 src/run_corpus.py --reintentos 3            (tres reintentos por fallo)
+python3 src/run_corpus.py --corpus otro.json        (otro fichero de reseñas)
 ```
 
 ## Lo que no hace

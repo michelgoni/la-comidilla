@@ -11,4 +11,4 @@ Motivo: con un json por línea los ficheros se pueden leer igual, cortar por la 
 
 Esta decisión no introduce nada nuevo respecto a la decisión 01: la confirma y la extiende a los dos ficheros nuevos. La especificación 01 no se toca, porque su formato ya quedó decidido así.
 
-El programa que recorre el corpus se programó el 1 de noviembre de 2026, en `src/correr_corpus.py`, según la decisión `docs/decisions/02_run_corpus.md`.
+El programa que recorre el corpus se programó el 1 de noviembre de 2026, en `src/run_corpus.py`, según la decisión `docs/decisions/02_run_corpus.md`.

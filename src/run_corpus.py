@@ -167,9 +167,9 @@ def run(args: argparse.Namespace) -> None:
     reviews = extract.load_corpus(Path(args.corpus))
 
     total = len(reviews)
-    end = total if args.hasta is None else min(args.hasta, total)
+    end = total if args.end is None else min(args.end, total)
     done = load_done_numbers(RESULT_PATH)
-    pending = pending_numbers(total, args.desde, end, done)
+    pending = pending_numbers(total, args.start, end, done)
 
     print_start(
         total, len(done), len(pending), config["model"], prompt_path.name
@@ -195,7 +195,7 @@ def run(args: argparse.Namespace) -> None:
                 config["base_url"],
                 config["api_key"],
                 payload,
-                args.reintentos,
+                args.retries,
             )
 
             problems = []
@@ -261,29 +261,35 @@ def main() -> None:
     )
     parser.add_argument(
         "--desde",
+        dest="start",
+        metavar="N",
         type=int,
         default=0,
         help="Primera reseña del pase. Empieza en 0.",
     )
     parser.add_argument(
         "--hasta",
+        dest="end",
+        metavar="N",
         type=int,
         default=None,
         help="Final del pase, sin incluirlo. Por defecto, el final.",
     )
     parser.add_argument(
         "--reintentos",
+        dest="retries",
+        metavar="N",
         type=int,
         default=DEFAULT_RETRIES,
         help="Reintentos por reseña si el modelo falla.",
     )
     args = parser.parse_args()
 
-    if args.desde < 0:
+    if args.start < 0:
         parser.error("--desde no puede ser negativo.")
-    if args.hasta is not None and args.hasta < 0:
+    if args.end is not None and args.end < 0:
         parser.error("--hasta no puede ser negativo.")
-    if args.reintentos < 0:
+    if args.retries < 0:
         parser.error("--reintentos no puede ser negativo.")
 
     run(args)

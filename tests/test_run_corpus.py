@@ -17,7 +17,7 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 import extract
-import correr_corpus
+import run_corpus
 
 REVIEW_TEXT = "La comida estaba buenísima."
 GOOD_ANSWER = json.dumps(
@@ -121,7 +121,7 @@ class CorpusRunnerTests(unittest.TestCase):
             env = {}
 
         arguments = [
-            "correr_corpus.py",
+            "run_corpus.py",
             "--corpus",
             str(corpus),
             *(extra_arguments or []),
@@ -132,17 +132,17 @@ class CorpusRunnerTests(unittest.TestCase):
                 mock.patch.object(
                     extract, "SECRETS_PATH", folder / "missing.env"
                 ), mock.patch.object(
-                    correr_corpus, "RESULT_PATH", result
+                    run_corpus, "RESULT_PATH", result
                 ), mock.patch.object(
-                    correr_corpus, "ERROR_PATH", errors
+                    run_corpus, "ERROR_PATH", errors
                 ), mock.patch.object(
-                    correr_corpus.time, "sleep", sleeps.append
+                    run_corpus.time, "sleep", sleeps.append
                 ), mock.patch.object(
                     sys, "argv", arguments
                 ), redirect_stdout(
                     output
                 ):
-            correr_corpus.main()
+            run_corpus.main()
 
         return result, errors, output.getvalue(), sleeps
 
@@ -303,13 +303,13 @@ class CorpusRunnerTests(unittest.TestCase):
                     mock.patch.object(
                         extract, "SECRETS_PATH", folder / "missing.env"
                     ), mock.patch.object(
-                        correr_corpus, "RESULT_PATH", result
+                        run_corpus, "RESULT_PATH", result
                     ), mock.patch.object(
-                        correr_corpus, "ERROR_PATH", errors
+                        run_corpus, "ERROR_PATH", errors
                     ), mock.patch.object(
                         sys, "argv",
                         [
-                            "correr_corpus.py",
+                            "run_corpus.py",
                             "--corpus",
                             str(corpus),
                         ],
@@ -317,7 +317,7 @@ class CorpusRunnerTests(unittest.TestCase):
                         io.StringIO()
                     ):
                 with self.assertRaises(SystemExit):
-                    correr_corpus.main()
+                    run_corpus.main()
 
             self.assertFalse(result.exists())
             self.assertFalse(errors.exists())
