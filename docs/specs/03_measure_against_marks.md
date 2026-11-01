@@ -1,6 +1,6 @@
 # Especificación 03. Medir el modelo contra tus marcas
 
-Estado: propuesta para revisión de Michel. Si la apruebas, se copia a `docs/decisions/` y se empieza a programar.
+Estado: aprobada el 1 de noviembre de 2026. La decisión está en `docs/decisions/05_measure_against_marks.md`. Dos cambios sobre el texto original: el programa es `src/measure.py` (nombres de fichero en inglés, como en la especificación 02) y el resultado va a `labelled/result_marked.jsonl`, porque `labelled/result.jsonl` ya existe con datos de la versión antigua contaminada por la trampa que esta especificación corrige.
 
 ## Para qué existe
 
@@ -16,7 +16,7 @@ Sin este programa no hay forma de decir si el proyecto funciona. Los números qu
 
 ## Qué devuelve
 
-1. **`labelled/result.jsonl`.** Un json por línea, una línea por reseña. Campos: numero, local, estrellas, mias (tus juicios), del_modelo (los del modelo), avisos (problemas de forma), comparacion (aciertos, inventadas, omitidas), respuesta_cruda, milisegundos, modelo, prompt y fecha. Si se corta, al volver a lanzarlo salta las reseñas que ya están en este fichero.
+1. **`labelled/result_marked.jsonl`.** Un json por línea, una línea por reseña. Campos: numero, local, estrellas, mias (tus juicios), del_modelo (los del modelo), avisos (problemas de forma), comparacion (aciertos, inventadas, omitidas), respuesta_cruda, milisegundos, modelo, prompt y fecha. Si se corta, al volver a lanzarlo salta las reseñas que ya están en este fichero.
 2. **Por pantalla, al final, un resumen:**
    - Reseñas medidas.
    - Juicios tuyos y juicios del modelo.
@@ -47,7 +47,7 @@ La precisión se calcula dividiendo los aciertos entre el total de juicios del m
 ## Línea de comandos
 
 ```
-python3 src/medir.py
+python3 src/measure.py
 ```
 
 No tiene opciones. Siempre mide la hoja entera.
