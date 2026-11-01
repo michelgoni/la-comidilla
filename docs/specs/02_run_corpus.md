@@ -1,6 +1,6 @@
 # Especificación 02. Recorrer el corpus entero
 
-Estado: propuesta para revisión de Michel. Si la apruebas, se copia a `docs/decisions/` y se empieza a programar.
+Estado: aprobada el 1 de noviembre de 2026. La decisión está en `docs/decisions/02_run_corpus.md`. La decisión de formato (un json por línea) quedó aprobada el 29 de octubre de 2026, en `docs/decisions/02_format_jsonl.md`.
 
 ## Para qué existe
 
@@ -40,10 +40,10 @@ No piensa nada nuevo. Toda la conversación con el modelo la hace el programa de
 ## Línea de comandos
 
 ```
-python3 src/correr_corpus.py                          (todas las que falten)
-python3 src/correr_corpus.py --desde 0 --hasta 20      (solo las veinte primeras)
-python3 src/correr_corpus.py --reintentos 3            (tres reintentos por fallo)
-python3 src/correr_corpus.py --corpus otro.json        (otro fichero de reseñas)
+python3 src/run_corpus.py                          (todas las que falten)
+python3 src/run_corpus.py --desde 0 --hasta 20      (solo las veinte primeras)
+python3 src/run_corpus.py --reintentos 3            (tres reintentos por fallo)
+python3 src/run_corpus.py --corpus otro.json        (otro fichero de reseñas)
 ```
 
 ## Lo que no hace
