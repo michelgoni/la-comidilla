@@ -19,6 +19,7 @@ This file is the contract between Michel (the owner) and any assistant or coding
 ## Language rules
 
 - **Code, comments, folder names and file names are always in English.** No exceptions.
+- **Pull requests are always in English.** Title and description. Commit messages follow the same rule, as `docs/working-method.md` says.
 - **Project documentation is written in Spanish**, plain language, no acronyms and no opaque labels. That covers `docs/`, the README and the vault notes. If Michel asks for a document in English, that document is the exception and it is said so in its first line.
 
 ## Code rules

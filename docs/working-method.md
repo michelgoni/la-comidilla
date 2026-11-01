@@ -12,7 +12,7 @@ Una rama por especificación, una pull request por cambio, y las pruebas automá
 4. **Solo se fusiona con las pruebas en verde.** Una prueba en rojo significa que no se fusiona, por pequeño que sea el cambio.
 5. **Un tema por pull request.** Si la pull request se llena de un segundo tema, se parte en dos.
 6. **Michel fusiona.** El asistente abre la pull request, lee las comprobaciones y cuenta el resultado. La fusión la decide Michel, salvo que diga lo contrario.
-7. **Los mensajes de commit van en inglés**, en una línea y en imperativo.
+7. **Los mensajes de commit y las pull request van en inglés.** El mensaje de commit va en una línea y en imperativo. El título y la descripción de la pull request, igual: todo lo que se lee en GitHub va en inglés.
 
 ## En comandos
 
