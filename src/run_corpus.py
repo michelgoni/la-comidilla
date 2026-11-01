@@ -23,10 +23,10 @@ PROGRESS_EVERY = 25
 RAW_ANSWER_LIMIT = 2000
 
 
-def load_done_numbers(path: Path) -> set:
-    """Return the review numbers already written; ignore unusable lines."""
+def load_saved_entries(path: Path) -> dict:
+    """Return the last line saved per review; ignore unusable lines."""
     if not path.exists():
-        return set()
+        return {}
 
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -35,7 +35,7 @@ def load_done_numbers(path: Path) -> set:
             f"Could not read the result file {path}: {exc}"
         ) from exc
 
-    done = set()
+    saved = {}
     for line in lines:
         line = line.strip()
         if not line:
@@ -45,9 +45,57 @@ def load_done_numbers(path: Path) -> set:
         except json.JSONDecodeError:
             continue
         if isinstance(entry, dict) and isinstance(entry.get("numero"), int):
-            done.add(entry["numero"])
+            saved[entry["numero"]] = entry
 
-    return done
+    return saved
+
+
+def done_numbers(saved: dict, retry_failed: bool) -> set:
+    """Return the reviews that count as done; failed ones may rejoin."""
+    if retry_failed:
+        return {
+            number
+            for number, entry in saved.items()
+            if not entry.get("error")
+        }
+    return set(saved)
+
+
+def drop_error_lines(path: Path, numbers: list) -> None:
+    """Remove failed lines of retried reviews; the errors file keeps them."""
+    if not path.exists():
+        return
+
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise SystemExit(
+            f"Could not read the result file {path}: {exc}"
+        ) from exc
+
+    kept = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            entry = json.loads(stripped)
+        except json.JSONDecodeError:
+            kept.append(line)
+            continue
+        failed = (
+            isinstance(entry, dict)
+            and entry.get("numero") in numbers
+            and entry.get("error")
+        )
+        if not failed:
+            kept.append(line)
+
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(
+        "".join(line + "\n" for line in kept), encoding="utf-8"
+    )
+    temporary.replace(path)
 
 
 def pending_numbers(total: int, start: int, end: int, done: set) -> list:
@@ -168,7 +216,8 @@ def run(args: argparse.Namespace) -> None:
 
     total = len(reviews)
     end = total if args.end is None else min(args.end, total)
-    done = load_done_numbers(RESULT_PATH)
+    saved = load_saved_entries(RESULT_PATH)
+    done = done_numbers(saved, args.retry_failed)
     pending = pending_numbers(total, args.start, end, done)
 
     print_start(
@@ -178,6 +227,9 @@ def run(args: argparse.Namespace) -> None:
     if not pending:
         print("Hechas en este pase: 0 | fallos: 0 | tiempo: 0.0 min")
         return
+
+    if args.retry_failed:
+        drop_error_lines(RESULT_PATH, pending)
 
     RESULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     ERROR_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -282,6 +334,12 @@ def main() -> None:
         type=int,
         default=DEFAULT_RETRIES,
         help="Reintentos por reseña si el modelo falla.",
+    )
+    parser.add_argument(
+        "--reintentar-fallidas",
+        dest="retry_failed",
+        action="store_true",
+        help="Volver a pasar las reseñas cuya línea lleva error.",
     )
     args = parser.parse_args()
 
