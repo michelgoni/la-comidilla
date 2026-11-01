@@ -94,6 +94,17 @@ def read_lines(path: Path) -> list:
     ]
 
 
+def seed_result(folder: Path, entries: list) -> Path:
+    """Write an existing result file with the given (numero, error) pairs."""
+    path = folder / "result_corpus.jsonl"
+    lines = [
+        json.dumps({"numero": number, "error": error}, ensure_ascii=False)
+        for number, error in entries
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
 class CorpusRunnerTests(unittest.TestCase):
     """The runner walks the corpus, resumes and survives failures."""
 
@@ -259,6 +270,129 @@ class CorpusRunnerTests(unittest.TestCase):
 
         self.assertEqual(len(calls), 2)
         self.assertEqual([entry["numero"] for entry in entries], [2, 3])
+
+    def test_retry_failed_reprocesses_only_the_error_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            corpus = write_corpus(folder, 3)
+            seed_result(
+                folder, [(0, ""), (1, "sin fondos"), (2, "")]
+            )
+            with fake_server([(200, model_answer(GOOD_ANSWER))]) as (
+                base_url,
+                calls,
+            ):
+                result, _, _, _ = self.run_main(
+                    folder,
+                    base_url,
+                    corpus,
+                    ["--reintentar-fallidas"],
+                )
+
+            entries = read_lines(result)
+
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(entries), 3)
+        self.assertEqual(
+            sorted(entry["numero"] for entry in entries), [0, 1, 2]
+        )
+        by_number = {entry["numero"]: entry for entry in entries}
+        self.assertTrue(by_number[1]["forma_correcta"])
+        self.assertEqual(by_number[1]["error"], "")
+
+    def test_without_the_flag_error_rows_stay_skipped(self) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            corpus = write_corpus(folder, 3)
+            seed_result(
+                folder, [(0, ""), (1, "sin fondos"), (2, "")]
+            )
+            with fake_server([(200, model_answer(GOOD_ANSWER))]) as (
+                base_url,
+                calls,
+            ):
+                result, _, _, _ = self.run_main(folder, base_url, corpus)
+
+            entries = read_lines(result)
+
+        self.assertEqual(len(calls), 0)
+        self.assertEqual(len(entries), 3)
+        self.assertEqual(
+            [entry for entry in entries if entry["numero"] == 1][0][
+                "error"
+            ],
+            "sin fondos",
+        )
+
+    def test_retried_failure_keeps_one_line_and_grows_errors(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            corpus = write_corpus(folder, 1)
+            with fake_server([(500, '{"error": "roto"}')]) as (
+                base_url,
+                calls,
+            ):
+                first = self.run_main(
+                    folder,
+                    base_url,
+                    corpus,
+                    ["--reintentar-fallidas", "--reintentos", "0"],
+                )
+                self.run_main(
+                    folder,
+                    base_url,
+                    corpus,
+                    ["--reintentar-fallidas", "--reintentos", "0"],
+                )
+
+            entries = read_lines(first[0])
+            error_entries = read_lines(first[1])
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["numero"], 0)
+        self.assertTrue(entries[0]["error"])
+        self.assertEqual(len(error_entries), 2)
+
+    def test_retry_failed_respects_the_requested_range(self) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            corpus = write_corpus(folder, 5)
+            seed_result(
+                folder, [(number, "sin fondos") for number in range(5)]
+            )
+            with fake_server([(200, model_answer(GOOD_ANSWER))]) as (
+                base_url,
+                calls,
+            ):
+                result, errors, _, _ = self.run_main(
+                    folder,
+                    base_url,
+                    corpus,
+                    [
+                        "--reintentar-fallidas",
+                        "--desde",
+                        "2",
+                        "--hasta",
+                        "4",
+                    ],
+                )
+
+            entries = read_lines(result)
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(entries), 5)
+        self.assertEqual(
+            sorted(entry["numero"] for entry in entries), [0, 1, 2, 3, 4]
+        )
+        by_number = {entry["numero"]: entry for entry in entries}
+        self.assertTrue(by_number[2]["forma_correcta"])
+        self.assertTrue(by_number[3]["forma_correcta"])
+        for number in (0, 1, 4):
+            self.assertEqual(by_number[number]["error"], "sin fondos")
+        self.assertEqual(read_lines(errors), [])
 
     def test_wrong_shape_keeps_the_raw_answer_and_no_error_row(self) -> None:
         bad_answer = json.dumps(
