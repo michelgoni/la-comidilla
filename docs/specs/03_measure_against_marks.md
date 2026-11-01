@@ -77,3 +77,11 @@ Solo la librería estándar de Python. Importa el programa de la especificación
 ## Trampa de la versión antigua que hay que corregir
 
 El programa antiguo leía el prompt uno, pero apuntaba en el resultado el nombre del prompt tres. Es decir, el fichero de resultados decía que se había usado un prompt que no era el que se usó. Eso hace que los números no se puedan reproducir con confianza. La versión nueva tiene que usar una única ruta de prompt y apuntar exactamente la que usó. Si no se corrige, cualquier comparación futura arrastra el error.
+
+## Cómo se trabaja esta especificación
+
+- El trabajo va en la rama `spec-03-measure-against-marks`, nunca directamente sobre `main`.
+- Se abre una pull request contra `main` cuando la rama está lista.
+- GitHub ejecuta las pruebas solo, en cada pull request. Si alguna falla, no se fusiona.
+- Solo se fusiona con las pruebas en verde y con el visto bueno de Michel.
+- El método completo, con los comandos, está en `docs/working-method.md`.

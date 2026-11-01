@@ -70,3 +70,11 @@ Solo la librería estándar de Python. Importa el programa de la especificación
 ## Decisión propuesta, cámbiala si no te vale
 
 El programa de la especificación 01 guarda cada llamada en un registro con sangría. Este programa guarda una línea por reseña. Son dos formatos distintos para el mismo tipo de información. La propuesta es que los dos usen un json por línea, para que todo se pueda leer igual y se pueda cortar sin romper el fichero. Si prefieres mantener el registro con sangría, se cambia aquí y en la especificación 01.
+
+## Cómo se trabaja esta especificación
+
+- El trabajo va en la rama `spec-02-run-corpus`, nunca directamente sobre `main`.
+- Se abre una pull request contra `main` cuando la rama está lista.
+- GitHub ejecuta las pruebas solo, en cada pull request. Si alguna falla, no se fusiona.
+- Solo se fusiona con las pruebas en verde y con el visto bueno de Michel.
+- El método completo, con los comandos, está en `docs/working-method.md`.
