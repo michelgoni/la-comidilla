@@ -68,6 +68,19 @@ Criterio de aceptación: reproduce los números publicados (49/52/56, 3 inventad
 - **Se publica:** cuenta por pareja, cuenta por fila, F1 por reseña, intervalo por bootstrap de reseñas (no de parejas), tabla por tema por pareja, y las dos lecturas de mixto.
 - Si Michel prefiere 40 reseñas, se añaden 10 antes de empezar a marcar. A partir de ahí, la hoja no se toca.
 
+## Resultado de la medida limpia (2 de noviembre de 2026)
+
+La hoja se cerró con 30 reseñas y 87 marcas. Una pasada de cada programa, sin volver a llamar a nadie. Los resultados están en `labelled/result_blind.jsonl` y `labelled/result_rules_blind.json`, y la tabla se recalcula con `python3 src/recount.py`.
+
+- Modelo: 75 aciertos de 94 parejas (79,8%), 86,2% de recuerdo, 19 inventadas, 12 omitidas, 152 filas, F1 82,9%.
+- Rival: 36 aciertos de 54 parejas (66,7%), 41,4% de recuerdo, 18 inventadas, 51 omitidas, 63 filas, F1 51,1%.
+- Intervalo por bootstrap de reseñas para la diferencia: recuerdo de 34,5 a 54,3 puntos, F1 de 21,9 a 41,2, precisión de 0,1 a 25,7.
+- Por tema, recuerdo del modelo: ambiente 18 de 26, comida 25 de 25, espera 5 de 6, precio 9 de 10, servicio 18 de 20.
+
+Con la hoja marcada a ciegas, la precisión del modelo baja del 94,2% al 79,8% y su ventaja sobre el rival en precisión queda pequeña; la ventaja de recuerdo se mantiene y es grande. Es lo que cabía esperar si la revisión de la hoja vieja (decisión 07) había inflado la precisión.
+
+Estos son los números que se publican en el README. Los de la hoja de 20 quedan como medida histórica.
+
 ## Lo que no cambia
 
 El corpus, el léxico, el prompt, el modelo, las 20 reseñas marcadas y los ficheros ya medidos.

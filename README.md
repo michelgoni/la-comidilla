@@ -20,8 +20,8 @@ Tres campos y nada más: el tema, la polaridad y el trozo. El trozo va literal, 
 
 ## Estado
 
-- **Terminado:** el extractor (`src/extract.py`), el programa que recorre el corpus (`src/run_corpus.py`), el examen que mide contra las reseñas marcadas a mano (`src/measure.py`) y el rival de reglas (`src/rules.py`). Todos con sus pruebas, y GitHub las ejecuta en cada cambio.
-- **Pendiente:** una medida limpia sobre reseñas nuevas marcadas a ciegas. La hoja actual se revisó después de ver la primera respuesta del modelo.
+- **Terminado:** el extractor (`src/extract.py`), el programa que recorre el corpus (`src/run_corpus.py`), el examen que mide contra las reseñas marcadas a mano (`src/measure.py`), el rival de reglas (`src/rules.py`) y el programa que recalcula la tabla desde los resultados guardados (`src/recount.py`). Todos con sus pruebas, y GitHub las ejecuta en cada cambio.
+- **Hecho:** la medida limpia del 2 de noviembre de 2026, sobre 30 reseñas marcadas a ciegas antes de ver ninguna respuesta del modelo.
 
 ## Cómo se trabaja aquí
 
@@ -33,6 +33,7 @@ Cada pieza sigue el mismo camino: se escribe la especificación, se propone, se 
 python3 src/extract.py --index 3                  (analiza la reseña número 3)
 python3 src/run_corpus.py                         (recorre el corpus entero)
 python3 src/rules.py                              (el rival de reglas, sin gastar llamadas)
+python3 src/recount.py                            (recalcula la tabla desde los resultados guardados)
 python3 -m unittest discover -s tests             (las pruebas, sin gastar llamadas)
 ```
 
@@ -44,32 +45,35 @@ El corpus y la hoja de reseñas marcadas a mano no se publican. Son textos de te
 
 ## Resultados
 
-El modelo se midió el 1 de noviembre de 2026 y el rival se ejecutó el 2, sobre las 20 reseñas marcadas a mano, que suman 56 juicios. El modelo es Claude Haiku 5.5 con el prompt `prompt_v4.txt`; el rival de reglas usa el léxico fijo del anexo de la especificación 04. La comparación sale de los resultados ya guardados: no se ha vuelto a llamar al modelo. Los números de la tabla se recalculan desde esas respuestas guardadas, porque el fichero de resultados es anterior al contador por parejas y no guarda ese campo.
+Medida principal: 30 reseñas marcadas a mano **antes** de ver ninguna respuesta del modelo, con 87 juicios. El modelo es Claude Haiku 5.5 con el prompt `prompt_v4.txt`; el rival de reglas usa el léxico fijo del anexo de la especificación 04. Una sola pasada de cada programa el 2 de noviembre de 2026, sin volver a llamar a nadie. La tabla se recalcula con `python3 src/recount.py`.
 
 | Medida | Modelo | Rival de reglas |
 | --- | ---: | ---: |
-| Precisión por pareja | 94,2% | 79,5% |
-| Recuerdo por pareja | 87,5% | 62,5% |
-| Parejas inventadas | 3 de 52 | 9 de 44 |
-| Parejas omitidas | 7 de 56 | 21 de 56 |
-| Filas de juicio | 106 | 57 |
-| Filas por pareja | 2,04 | 1,30 |
+| Precisión por pareja | 79,8% | 66,7% |
+| Recuerdo por pareja | 86,2% | 41,4% |
+| F1 por pareja | 82,9% | 51,1% |
+| Parejas inventadas | 19 de 94 | 18 de 54 |
+| Parejas omitidas | 12 de 87 | 51 de 87 |
+| Filas de juicio | 152 | 63 |
+| Filas por pareja | 1,62 | 1,17 |
+| F1 medio por reseña | 83,1% | 50,8% |
+| Precisión por fila | 49,3% | 57,1% |
 
-El modelo gana en esta cuenta: acierta 14 parejas más y falla menos. El rival es más silencioso (44 parejas frente a 52), pero de las suyas falla más: 9 inventadas frente a 3, y se deja 21 frente a 7. Cuando los dos pillan el tema, el tono lo aciertan casi igual: 43 de 45 veces el modelo (96%) y 31 de 34 el rival (91%). La diferencia está sobre todo en detectar el tema: el modelo se deja 3 parejas por no ver el tema y el rival 14. Contando fila a fila, en cambio, la nota que combina precisión y recuerdo sale algo mejor en el rival: 61,9% frente a 60,5%, porque la cuenta por pareja perdona la repetición.
+El modelo encuentra casi el doble de juicios: 75 de 87 frente a 36 de 87. La ventaja de recuerdo es sólida: el intervalo por bootstrap de reseñas va de 34,5 a 54,3 puntos. La de precisión es real pero pequeña, 13,1 puntos, con un intervalo que casi toca el cero (0,1 a 25,7). Contando por fila, el modelo gana en la nota que combina precisión y recuerdo (62,8% frente a 48,0%) y pierde en precisión sola (49,3% frente a 57,1%), porque escribe 152 filas para 94 parejas.
 
-Por tema (coincide el tema, de las reseñas en que ese programa lo menciona; las dos columnas no comparten base):
+Por tema, contado por pareja y con las marcas como denominador:
 
 | Tema | Modelo | Rival de reglas |
 | --- | ---: | ---: |
-| Ambiente | 11 de 13 | 10 de 13 |
-| Comida | 14 de 14 | 9 de 15 |
-| Espera | 4 de 4 | 3 de 5 |
-| Precio | 5 de 5 | 4 de 7 |
-| Servicio | 11 de 12 | 8 de 12 |
+| Ambiente | 18 de 26 | 7 de 26 |
+| Comida | 25 de 25 | 14 de 25 |
+| Espera | 5 de 6 | 2 de 6 |
+| Precio | 9 de 10 | 4 de 10 |
+| Servicio | 18 de 20 | 9 de 20 |
 
-La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión al modelo: devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Esa repetición se mide aparte y no se esconde. No son filas duplicadas: cada repetición cita un trozo distinto de la reseña, como pide el prompt.
+Los fallos del modelo no son invenciones: son discusiones de etiqueta. De sus 19 parejas inventadas, 13 son tres desacuerdos que se repiten: dónde va un juicio cuando el tiempo y el trato se mezclan (4), si un error en la cuenta o una ración pequeña es precio (4), y si una frase con elogio y pega es mixta o son dos marcas (5). La mitad de sus omisiones, 6 de 12, son elogios generales («gran sitio», «muy recomendable») que la hoja cuenta como ambiente y el modelo no se atreve a marcar.
 
-Dos límites que conviene decir en voz alta. La muestra es pequeña: 20 reseñas y 56 parejas, así que un par de aciertos mueve varios puntos. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta: con la hoja anterior a esa revisión, el mismo modelo daba 69,2% de precisión y 68,2% el rival, casi empate. Buena parte de la ventaja de precisión que se publica nace de la revisión, no del modelo. Para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
+La medida anterior, con 20 reseñas, dio 94,2% de precisión y 87,5% de recuerdo. Esa hoja se revisó después de ver la respuesta del modelo (decisión 07), así que su precisión está inflada: con la hoja de antes de la revisión el modelo sacaba 69,2% y el rival 68,2%. Se queda como medida histórica y no es la que cuenta.
 
 ## Dónde está cada cosa
 
