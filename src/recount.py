@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import measure
@@ -21,6 +22,9 @@ SOURCES = (
     ("Rival de reglas", PROJECT / "labelled" / "result_rules.json"),
 )
 TOPICS = ("ambiente", "comida", "espera", "precio", "servicio")
+SHEET_ENV = "COMIDILLA_SHEET"
+MODEL_ENV = "COMIDILLA_RESULT"
+RULES_ENV = "COMIDILLA_RULES"
 
 
 def sheet_version(path: Path) -> str:
@@ -224,13 +228,18 @@ def show_source(name: str, entries: dict, marked: list) -> None:
 
 def run() -> None:
     """Recount every saved source against the current sheet and show it."""
-    marked = measure.load_marked(SHEET_PATH)
-    print(
-        f"Hoja: {SHEET_PATH.name} | {len(marked)} reseñas | "
-        f"{sum(len(review['valoraciones']) for review in marked)} marcas | "
-        f"sha256 {sheet_version(SHEET_PATH)[:12]}"
+    sheet_path = Path(os.environ.get(SHEET_ENV, str(SHEET_PATH)))
+    sources = (
+        ("Modelo", Path(os.environ.get(MODEL_ENV, str(SOURCES[0][1])))),
+        ("Rival de reglas", Path(os.environ.get(RULES_ENV, str(SOURCES[1][1])))),
     )
-    for name, path in SOURCES:
+    marked = measure.load_marked(sheet_path)
+    print(
+        f"Hoja: {sheet_path.name} | {len(marked)} reseñas | "
+        f"{sum(len(review['valoraciones']) for review in marked)} marcas | "
+        f"sha256 {sheet_version(sheet_path)[:12]}"
+    )
+    for name, path in sources:
         entries = load_source(path)
         if not entries:
             print()

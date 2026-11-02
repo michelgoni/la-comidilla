@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import io
+import json
+import os
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
@@ -167,6 +171,52 @@ class ComparisonTest(unittest.TestCase):
 
     def test_ratio_without_denominator(self):
         self.assertEqual(rules.format_ratio(0, 0), "no aplica")
+
+
+class RunTest(unittest.TestCase):
+    """The program can be pointed at another sheet from the environment."""
+
+    def test_environment_selects_another_sheet_and_result(self):
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            sheet = folder / "hoja.json"
+            sheet.write_text(
+                json.dumps(
+                    [
+                        {
+                            "numero": 5,
+                            "local": "Local 5",
+                            "estrellas": 4,
+                            "texto": "La comida estaba rica.",
+                            "valoraciones": [
+                                {
+                                    "tema": "comida",
+                                    "polaridad": "positivo",
+                                    "trozo": "La comida estaba rica",
+                                }
+                            ],
+                            "marcada": True,
+                        }
+                    ],
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            chosen = folder / "resultado.json"
+            env = {
+                "COMIDILLA_SHEET": str(sheet),
+                "COMIDILLA_RESULT": str(chosen),
+            }
+            with mock.patch.dict(os.environ, env, clear=True), \
+                    mock.patch.object(rules, "LABELLED_PATH", folder / "no.json"), \
+                    mock.patch.object(
+                        rules, "RULES_PATH", folder / "no_resultado.json"
+                    ), redirect_stdout(io.StringIO()):
+                rules.run()
+
+            self.assertTrue(chosen.exists())
+            self.assertFalse((folder / "no_resultado.json").exists())
+            self.assertEqual(json.loads(chosen.read_text())[0]["numero"], 5)
 
 
 if __name__ == "__main__":
