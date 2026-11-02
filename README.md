@@ -20,8 +20,8 @@ Tres campos y nada más: el tema, la polaridad y el trozo. El trozo va literal, 
 
 ## Estado
 
-- **Terminado:** el extractor, en `src/extract.py`. Coge una reseña, llama al modelo, limpia la respuesta, revisa que la forma sea la correcta y apunta la llamada en un registro. Tiene sus pruebas y GitHub las ejecuta en cada cambio.
-- **Especificado y pendiente:** recorrer el corpus entero (`docs/specs/02_run_corpus.md`), medir contra las reseñas marcadas a mano (`docs/specs/03_measure_against_marks.md`) y el rival de reglas (`docs/specs/04_rules_baseline.md`).
+- **Terminado:** el extractor (`src/extract.py`), el programa que recorre el corpus (`src/run_corpus.py`) y el examen que mide contra las reseñas marcadas a mano (`src/measure.py`). Los tres con sus pruebas, y GitHub las ejecuta en cada cambio.
+- **Pendiente:** el rival de reglas (`docs/specs/04_rules_baseline.md`), que es el listón contra el que se compara el modelo.
 
 ## Cómo se trabaja aquí
 
@@ -31,6 +31,7 @@ Cada pieza sigue el mismo camino: se escribe la especificación, se propone, se 
 
 ```
 python3 src/extract.py --index 3                  (analiza la reseña número 3)
+python3 src/run_corpus.py                         (recorre el corpus entero)
 python3 -m unittest discover -s tests             (las pruebas, sin gastar llamadas)
 ```
 
@@ -40,18 +41,21 @@ Solo necesita la librería estándar de Python, nada que instalar. Para llamar d
 
 El corpus y la hoja de reseñas marcadas a mano no se publican. Son textos de terceros y una hoja de trabajo personal, así que quedan fuera con el `.gitignore`. Para ejecutar el programa hace falta un corpus propio con esta forma: `[local, estrellas, texto]`.
 
-## Resultados, provisionales
+## Resultados
 
-Medido con el prototipo anterior sobre 20 reseñas marcadas a mano. «Tema» y «tono» cuentan cada valoración por separado; «precisión» y «recuerdo» cuentan cada pareja de tema y tono una sola vez.
+Medido el 1 de noviembre de 2026 con este código, sobre las 20 reseñas marcadas a mano, que suman 56 juicios. Modelo Claude Haiku 5.5 y prompt `prompt_v4.txt`.
 
-| Medida | tema | tono | precisión | recuerdo |
-| --- | --- | --- | --- | --- |
-| Modelo, con la regla del mixto en el prompt | 75% | 86% | 73% | 84% |
-| Rival de reglas, listas de palabras | 66% | 74% | 68% | 68% |
+| Medida | Resultado |
+| --- | --- |
+| Precisión por pareja | 94,2% |
+| Recuerdo por pareja | 87,5% |
+| Parejas inventadas | 3 de 52 |
+| Parejas omitidas | 7 de 56 |
+| Avisos de forma | 0 |
 
-La frase que lo resume: las reglas se pierden uno de cada tres juicios; el modelo, uno de cada seis. La precisión casi empata, así que el modelo se justifica por lo que no se le escapa, no por ser más limpio.
+La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión: el modelo devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Ese ruido se mide aparte y no se esconde.
 
-Estas cifras salen del prototipo anterior y hay que repetirlas con este código, que se está reconstruyendo con especificaciones. Mientras no se repitan, valen como orden de magnitud, no como resultado final.
+Dos límites que conviene decir en voz alta. El rival de reglas todavía no está reconstruido, así que la comparación contra listas de palabras queda para más adelante. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta; para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
 
 ## Dónde está cada cosa
 
