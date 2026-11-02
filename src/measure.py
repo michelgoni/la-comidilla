@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import time
@@ -158,6 +159,11 @@ def compare(mine: list, model_judgments: list) -> dict:
     }
 
 
+def sheet_version(path: Path) -> str:
+    """Return the fingerprint of the sheet, so each line names its exam."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def build_entry(
     marked_review: dict,
     mine: list,
@@ -167,6 +173,7 @@ def build_entry(
     milliseconds: int,
     model: str,
     prompt_name: str,
+    exam_version: str,
 ) -> dict:
     """Build one result row with the fields the specification asks for."""
     return {
@@ -182,6 +189,7 @@ def build_entry(
         "milisegundos": milliseconds,
         "modelo": model,
         "prompt": prompt_name,
+        "sheet_version": exam_version,
         "fecha": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
 
@@ -318,7 +326,7 @@ def show_summary(entries: dict, marked: list) -> None:
     )
     print(f"- Inventadas: {invented_pairs} | omitidas: {missed_pairs}")
     print()
-    print("Por veces (ruido)")
+    print("Por veces (repetición)")
     print(
         f"- Aciertos: {aciertos} | inventadas: {inventadas} | "
         f"omitidas: {omitidas}"
@@ -366,6 +374,9 @@ def run() -> None:
     )
     print(f"Modelo: {config['model']} | prompt: {prompt_path.name}")
 
+    exam_version = sheet_version(LABELLED_PATH)
+    print(f"Hoja: sha256 {exam_version[:12]}")
+
     RESULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with RESULT_PATH.open("a", encoding="utf-8") as result_file:
         for review in pending:
@@ -381,6 +392,7 @@ def run() -> None:
                 milliseconds,
                 config["model"],
                 prompt_path.name,
+                exam_version,
             )
             write_entry(result_file, entry)
             saved[review["numero"]] = entry
