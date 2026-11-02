@@ -1,6 +1,6 @@
 # Propuesta 05. Integridad de los resultados y medida limpia
 
-Estado: propuesta para revisión de Michel. Fecha: 2 de noviembre de 2026.
+Estado: aprobada el 2 de noviembre de 2026. La decisión está en `docs/decisions/09_results_integrity.md`. Fecha de la propuesta: 2 de noviembre de 2026.
 
 ## Para qué existe
 
@@ -82,4 +82,6 @@ El corpus, el léxico, el prompt, el modelo, las 20 reseñas marcadas y los fich
 2. Elige la opción de métrica (a, b o c). Recomiendo b.
 3. Fija el tamaño de la muestra nueva y si quiere segundo anotador.
 
-Con eso se escribe la decisión 09, se implementan los cambios 2 y 3 y se lanza la medida limpia.
+Decidido el 2 de noviembre de 2026: la regla de mixto, tal como está escrita; la opción b para la métrica; 30 reseñas nuevas, sin segundo anotador por ahora. El detalle está en `docs/decisions/09_results_integrity.md`.
+
+Con eso queda escrito. La medida limpia arranca cuando la hoja nueva esté marcada y cerrada.
