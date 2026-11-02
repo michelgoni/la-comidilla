@@ -20,8 +20,8 @@ Tres campos y nada más: el tema, la polaridad y el trozo. El trozo va literal, 
 
 ## Estado
 
-- **Terminado:** el extractor (`src/extract.py`), el programa que recorre el corpus (`src/run_corpus.py`) y el examen que mide contra las reseñas marcadas a mano (`src/measure.py`). Los tres con sus pruebas, y GitHub las ejecuta en cada cambio.
-- **Pendiente:** el rival de reglas (`docs/specs/04_rules_baseline.md`), que es el listón contra el que se compara el modelo.
+- **Terminado:** el extractor (`src/extract.py`), el programa que recorre el corpus (`src/run_corpus.py`), el examen que mide contra las reseñas marcadas a mano (`src/measure.py`) y el rival de reglas (`src/rules.py`). Todos con sus pruebas, y GitHub las ejecuta en cada cambio.
+- **Pendiente:** una medida limpia sobre reseñas nuevas marcadas a ciegas. La hoja actual se revisó después de ver la primera respuesta del modelo.
 
 ## Cómo se trabaja aquí
 
@@ -32,6 +32,7 @@ Cada pieza sigue el mismo camino: se escribe la especificación, se propone, se 
 ```
 python3 src/extract.py --index 3                  (analiza la reseña número 3)
 python3 src/run_corpus.py                         (recorre el corpus entero)
+python3 src/rules.py                              (el rival de reglas, sin gastar llamadas)
 python3 -m unittest discover -s tests             (las pruebas, sin gastar llamadas)
 ```
 
@@ -43,19 +44,32 @@ El corpus y la hoja de reseñas marcadas a mano no se publican. Son textos de te
 
 ## Resultados
 
-Medido el 1 de noviembre de 2026 con este código, sobre las 20 reseñas marcadas a mano, que suman 56 juicios. Modelo Claude Haiku 5.5 y prompt `prompt_v4.txt`.
+El modelo se midió el 1 de noviembre de 2026 y el rival se ejecutó el 2, sobre las 20 reseñas marcadas a mano, que suman 56 juicios. El modelo es Claude Haiku 5.5 con el prompt `prompt_v4.txt`; el rival de reglas usa el léxico fijo del anexo de la especificación 04. La comparación sale de los resultados ya guardados: no se ha vuelto a llamar al modelo. Los números de la tabla se recalculan desde esas respuestas guardadas, porque el fichero de resultados es anterior al contador por parejas y no guarda ese campo.
 
-| Medida | Resultado |
-| --- | --- |
-| Precisión por pareja | 94,2% |
-| Recuerdo por pareja | 87,5% |
-| Parejas inventadas | 3 de 52 |
-| Parejas omitidas | 7 de 56 |
-| Avisos de forma | 0 |
+| Medida | Modelo | Rival de reglas |
+| --- | ---: | ---: |
+| Precisión por pareja | 94,2% | 79,5% |
+| Recuerdo por pareja | 87,5% | 62,5% |
+| Parejas inventadas | 3 de 52 | 9 de 44 |
+| Parejas omitidas | 7 de 56 | 21 de 56 |
+| Filas de juicio | 106 | 57 |
+| Filas por pareja | 2,04 | 1,30 |
 
-La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión: el modelo devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Ese ruido se mide aparte y no se esconde.
+El modelo gana en esta cuenta: acierta 14 parejas más y falla menos. El rival es más silencioso (44 parejas frente a 52), pero de las suyas falla más: 9 inventadas frente a 3, y se deja 21 frente a 7. Cuando los dos pillan el tema, el tono lo aciertan casi igual: 43 de 45 veces el modelo (96%) y 31 de 34 el rival (91%). La diferencia está sobre todo en detectar el tema: el modelo se deja 3 parejas por no ver el tema y el rival 14. Contando fila a fila, en cambio, la nota que combina precisión y recuerdo sale algo mejor en el rival: 61,9% frente a 60,5%, porque la cuenta por pareja perdona la repetición.
 
-Dos límites que conviene decir en voz alta. El rival de reglas todavía no está reconstruido, así que la comparación contra listas de palabras queda para más adelante. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta; para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
+Por tema (coincide el tema, de las reseñas en que ese programa lo menciona; las dos columnas no comparten base):
+
+| Tema | Modelo | Rival de reglas |
+| --- | ---: | ---: |
+| Ambiente | 11 de 13 | 10 de 13 |
+| Comida | 14 de 14 | 9 de 15 |
+| Espera | 4 de 4 | 3 de 5 |
+| Precio | 5 de 5 | 4 de 7 |
+| Servicio | 11 de 12 | 8 de 12 |
+
+La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión al modelo: devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Esa repetición se mide aparte y no se esconde. No son filas duplicadas: cada repetición cita un trozo distinto de la reseña, como pide el prompt.
+
+Dos límites que conviene decir en voz alta. La muestra es pequeña: 20 reseñas y 56 parejas, así que un par de aciertos mueve varios puntos. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta: con la hoja anterior a esa revisión, el mismo modelo daba 69,2% de precisión y 68,2% el rival, casi empate. Buena parte de la ventaja de precisión que se publica nace de la revisión, no del modelo. Para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
 
 ## Dónde está cada cosa
 
@@ -65,7 +79,7 @@ Dos límites que conviene decir en voz alta. El rival de reglas todavía no est�
 | `docs/proposals/` | Las propuestas, antes de programar. |
 | `docs/decisions/` | Las decisiones tomadas, con fecha y motivo. |
 | `docs/working-method.md` | La norma de trabajo: ramas, pull requests y pruebas. |
-| `src/` | El programa de extracción. |
+| `src/` | Los programas: extracción, corpus, examen y rival de reglas. |
 | `tests/` | Las pruebas. |
 | `prompts/` | Las versiones del texto que se manda al modelo. |
 | `AGENTS.md` | El contrato de trabajo con cualquier asistente que toque este repositorio. |
