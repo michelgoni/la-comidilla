@@ -44,7 +44,7 @@ El corpus y la hoja de reseñas marcadas a mano no se publican. Son textos de te
 
 ## Resultados
 
-Medido el 2 de noviembre de 2026 sobre las 20 reseñas marcadas a mano, que suman 56 juicios. El modelo es Claude Haiku 5.5 con el prompt `prompt_v4.txt`; el rival de reglas usa el léxico fijo del anexo de la especificación 04. La comparación sale de los resultados ya guardados: no se ha vuelto a llamar al modelo.
+El modelo se midió el 1 de noviembre de 2026 y el rival se ejecutó el 2, sobre las 20 reseñas marcadas a mano, que suman 56 juicios. El modelo es Claude Haiku 5.5 con el prompt `prompt_v4.txt`; el rival de reglas usa el léxico fijo del anexo de la especificación 04. La comparación sale de los resultados ya guardados: no se ha vuelto a llamar al modelo. Los números de la tabla se recalculan desde esas respuestas guardadas, porque el fichero de resultados es anterior al contador por parejas y no guarda ese campo.
 
 | Medida | Modelo | Rival de reglas |
 | --- | ---: | ---: |
@@ -55,9 +55,9 @@ Medido el 2 de noviembre de 2026 sobre las 20 reseñas marcadas a mano, que suma
 | Filas de juicio | 106 | 57 |
 | Filas por pareja | 2,04 | 1,30 |
 
-El modelo gana: encuentra 14 parejas más y falla menos. El rival es más silencioso (44 parejas frente a 52), pero de las suyas falla más: 9 inventadas frente a 3, y se deja 21 frente a 7. Cuando los dos pillan el tema, el tono lo aciertan casi igual: 43 de 45 veces el modelo (96%) y 31 de 34 el rival (91%). La diferencia está en detectar el tema, no en juzgarlo.
+El modelo gana en esta cuenta: acierta 14 parejas más y falla menos. El rival es más silencioso (44 parejas frente a 52), pero de las suyas falla más: 9 inventadas frente a 3, y se deja 21 frente a 7. Cuando los dos pillan el tema, el tono lo aciertan casi igual: 43 de 45 veces el modelo (96%) y 31 de 34 el rival (91%). La diferencia está sobre todo en detectar el tema: el modelo se deja 3 parejas por no ver el tema y el rival 14. Contando fila a fila, en cambio, la nota que combina precisión y recuerdo sale algo mejor en el rival: 61,9% frente a 60,5%, porque la cuenta por pareja perdona la repetición.
 
-Por tema (coincide el tema, de las reseñas en que alguno de los dos lo menciona):
+Por tema (coincide el tema, de las reseñas en que ese programa lo menciona; las dos columnas no comparten base):
 
 | Tema | Modelo | Rival de reglas |
 | --- | ---: | ---: |
@@ -67,9 +67,9 @@ Por tema (coincide el tema, de las reseñas en que alguno de los dos lo menciona
 | Precio | 5 de 5 | 4 de 7 |
 | Servicio | 11 de 12 | 8 de 12 |
 
-La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión al modelo: devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Ese ruido se mide aparte y no se esconde.
+La cuenta por pareja compara cada tema y tono una sola vez por reseña, que es como está marcada la hoja. La cuenta por filas, que castiga la repetición, da 46,2% de precisión al modelo: devuelve 106 filas para 52 parejas distintas, 2,04 por pareja. Esa repetición se mide aparte y no se esconde. No son filas duplicadas: cada repetición cita un trozo distinto de la reseña, como pide el prompt.
 
-Dos límites que conviene decir en voz alta. La muestra es pequeña: 20 reseñas y 56 parejas, así que un par de aciertos mueve varios puntos. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta; para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
+Dos límites que conviene decir en voz alta. La muestra es pequeña: 20 reseñas y 56 parejas, así que un par de aciertos mueve varios puntos. Y las marcas se revisaron después de ver la primera respuesta del modelo, así que la nota puede estar algo alta: con la hoja anterior a esa revisión, el mismo modelo daba 69,2% de precisión y 68,2% el rival, casi empate. Buena parte de la ventaja de precisión que se publica nace de la revisión, no del modelo. Para una medida limpia hacen falta reseñas nuevas marcadas a ciegas.
 
 ## Dónde está cada cosa
 
