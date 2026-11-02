@@ -21,6 +21,8 @@ El programa recalcula `labelled/result_rules.json` cada vez que corre. En la cor
 - Precisión: 0,795 | recuerdo: 0,625
 - Líneas de juicio del programa: 57
 
+Comparado con el modelo en el mismo examen, el rival no le gana: el modelo saca 94,2% de precisión y 87,5% de recuerdo por pareja, frente a 79,5% y 62,5%. La tabla completa está publicada en el README. El rival queda como listón barato y reproducible, no como sustituto del modelo.
+
 Comprobación contra los números publicados: las 57 filas de `del_modelo` salieron **idénticas, fila por fila**, a las del fichero que produjo la versión anterior del programa con el mismo léxico. La única diferencia del fichero nuevo está en las marcas (`mias`) de 10 reseñas, exactamente las que cambió la revisión de la hoja (decisión 07): el programa anterior se midió contra la hoja vieja. Mostraba al rival peor de lo que es, que es justo lo que la especificación manda corregir.
 
 ## Lo que no cambia
