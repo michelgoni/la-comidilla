@@ -12,6 +12,7 @@ Consecuencias:
 
 - Si las dos caras están en frases distintas, son dos marcas, una positiva y una negativa.
 - Dos marcas no pueden solaparse en el mismo tema. Si la misma frase aparece marcada dos veces, se queda una.
+- Un gusto personal no es una queja del local. «Me hubiera gustado que fueran más picantes» habla del paladar de quien escribe, no del producto, y no cambia la polaridad.
 
 Se aplica a la hoja nueva, la de la medida limpia. La hoja actual no se toca, por el motivo del punto 2.
 
