@@ -13,6 +13,7 @@ Consecuencias:
 - Si las dos caras están en frases distintas, son dos marcas, una positiva y una negativa.
 - Dos marcas no pueden solaparse en el mismo tema. Si la misma frase aparece marcada dos veces, se queda una.
 - Un gusto personal no es una queja del local. «Me hubiera gustado que fueran más picantes» habla del paladar de quien escribe, no del producto, y no cambia la polaridad.
+- Un error en la cuenta no es un juicio de precio. Cobrar de más o no saber explicar el ticket es servicio: el precio solo se marca cuando el autor dice que el sitio es caro o barato.
 
 Se aplica a la hoja nueva, la de la medida limpia. La hoja actual no se toca, por el motivo del punto 2.
 
