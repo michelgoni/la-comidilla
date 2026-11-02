@@ -64,6 +64,7 @@ Criterio de aceptación: reproduce los números publicados (49/52/56, 3 inventad
 - **A ciegas:** Michel marca la hoja y la cierra antes de ejecutar nada. No ve la respuesta del modelo hasta que esté cerrada.
 - **Congelado:** prompt `prompt_v4.txt`, modelo `claude-haiku-5-5`, léxico del anexo de la especificación 04. No se toca nada de eso entre las dos medidas.
 - **Una pasada por programa.** La respuesta cruda se guarda entera.
+- **La hoja se elige por entorno, no tocando código.** `measure.py`, `rules.py` y `recount.py` leen `COMIDILLA_SHEET` para la hoja, `COMIDILLA_RESULT` para el resultado del modelo y `COMIDILLA_RULES` para el del rival. Sin esas variables usan los ficheros de siempre, así que la medida histórica no se toca.
 - **Se publica:** cuenta por pareja, cuenta por fila, F1 por reseña, intervalo por bootstrap de reseñas (no de parejas), tabla por tema por pareja, y las dos lecturas de mixto.
 - Si Michel prefiere 40 reseñas, se añaden 10 antes de empezar a marcar. A partir de ahí, la hoja no se toca.
 

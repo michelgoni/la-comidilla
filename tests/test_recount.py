@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import io
 import json
+import os
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
@@ -215,6 +219,58 @@ class SourceLoadingTest(unittest.TestCase):
 
 
 class PublishedNumbersTest(unittest.TestCase):
+    def test_run_can_be_pointed_at_another_sheet(self) -> None:
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            sheet = folder / "hoja.json"
+            sheet.write_text(
+                json.dumps(
+                    [
+                        {
+                            "numero": 1,
+                            "local": "Local 1",
+                            "estrellas": 4,
+                            "texto": "La comida estaba rica.",
+                            "valoraciones": [
+                                judgment("comida", "positivo")
+                            ],
+                            "marcada": True,
+                        }
+                    ],
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            model = folder / "modelo.jsonl"
+            model.write_text(
+                json.dumps({"numero": 1, "del_modelo": [judgment("comida", "positivo")]})
+                + "\n",
+                encoding="utf-8",
+            )
+            rival = folder / "rival.json"
+            rival.write_text(
+                json.dumps(
+                    [{"numero": 1, "del_modelo": [judgment("comida", "positivo")]}]
+                ),
+                encoding="utf-8",
+            )
+            env = {
+                "COMIDILLA_SHEET": str(sheet),
+                "COMIDILLA_RESULT": str(model),
+                "COMIDILLA_RULES": str(rival),
+            }
+            output = io.StringIO()
+            with mock.patch.dict(os.environ, env, clear=True), \
+                    mock.patch.object(recount, "SHEET_PATH", folder / "no.json"), \
+                    redirect_stdout(output):
+                recount.run()
+            printed = output.getvalue()
+
+        self.assertIn("hoja.json", printed)
+        self.assertIn("Modelo: 1 de 1 reseñas", printed)
+        self.assertIn("Rival de reglas: 1 de 1 reseñas", printed)
+        self.assertIn("Aciertos: 1 | parejas emitidas: 1", printed)
+
     def test_the_current_files_give_the_published_numbers(self) -> None:
         project = Path(__file__).resolve().parent.parent
         sheet = project / "labelled" / "reviews_to_label.json"

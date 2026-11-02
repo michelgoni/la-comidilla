@@ -367,6 +367,37 @@ class MeasureTests(unittest.TestCase):
             sorted(entry["numero"] for entry in entries), [10, 11]
         )
 
+    def test_environment_selects_another_sheet_and_result(self) -> None:
+        answer = model_answer(GOOD_REPEAT)
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            sheet = write_sheet(folder, [(21, True, MINE)])
+            prompt = folder / "prompt_de_prueba.txt"
+            prompt.write_text("Prompt de prueba", encoding="utf-8")
+            chosen = folder / "otra_hoja.jsonl"
+            with fake_server([(200, answer)]) as (base_url, calls):
+                env = {
+                    "COMIDILLA_BASE_URL": base_url,
+                    "COMIDILLA_MODEL": "modelo-de-prueba",
+                    "COMIDILLA_API_KEY": "",
+                    "COMIDILLA_PROMPT": str(prompt),
+                    "COMIDILLA_SHEET": str(sheet),
+                    "COMIDILLA_RESULT": str(chosen),
+                }
+                with mock.patch.dict(os.environ, env, clear=True), \
+                        mock.patch.object(
+                            extract, "SECRETS_PATH", folder / "missing.env"
+                        ), mock.patch.object(
+                            measure, "LABELLED_PATH", folder / "no_existe.json"
+                        ), mock.patch.object(
+                            measure, "RESULT_PATH", folder / "no_usar.jsonl"
+                        ), redirect_stdout(io.StringIO()):
+                    measure.main()
+
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(len(read_lines(chosen)), 1)
+            self.assertFalse((folder / "no_usar.jsonl").exists())
+
     def test_sheet_with_nothing_marked_stops_and_writes_nothing(self) -> None:
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)

@@ -7,12 +7,15 @@ It never calls a model, never spends money, and never changes the lexicon.
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
 LABELLED_PATH = PROJECT / "labelled" / "reviews_to_label.json"
 RULES_PATH = PROJECT / "labelled" / "result_rules.json"
+SHEET_ENV = "COMIDILLA_SHEET"
+RESULT_ENV = "COMIDILLA_RESULT"
 
 POSITIVE = "positivo"
 NEGATIVE = "negativo"
@@ -260,8 +263,10 @@ def write_result(entries: list, path: Path) -> None:
 
 def run() -> None:
     """Judge every marked review with the lexicon and compare with the marks."""
-    marked = load_marked(LABELLED_PATH)
-    print(f"Hoja: {len(marked)} reseñas marcadas")
+    sheet_path = Path(os.environ.get(SHEET_ENV, str(LABELLED_PATH)))
+    result_path = Path(os.environ.get(RESULT_ENV, str(RULES_PATH)))
+    marked = load_marked(sheet_path)
+    print(f"Hoja: {sheet_path.name} | {len(marked)} reseñas marcadas")
 
     entries = []
     for review in marked:
@@ -274,8 +279,8 @@ def run() -> None:
             }
         )
 
-    write_result(entries, RULES_PATH)
-    print(f"Resultado en {RULES_PATH}")
+    write_result(entries, result_path)
+    print(f"Resultado en {result_path}")
     show_summary(entries)
 
 

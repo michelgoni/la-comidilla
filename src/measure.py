@@ -16,6 +16,8 @@ LABELLED_PATH = PROJECT / "labelled" / "reviews_to_label.json"
 RESULT_PATH = PROJECT / "labelled" / "result_marked.jsonl"
 DEFAULT_PROMPT_PATH = PROJECT / "prompts" / "prompt_v4.txt"
 ENV_PROMPT = "COMIDILLA_PROMPT"
+SHEET_ENV = "COMIDILLA_SHEET"
+RESULT_ENV = "COMIDILLA_RESULT"
 
 RAW_ANSWER_LIMIT = 2000
 
@@ -363,8 +365,10 @@ def run() -> None:
     config = extract.load_config()
     prompt_path = Path(os.environ.get(ENV_PROMPT, str(DEFAULT_PROMPT_PATH)))
     prompt = extract.load_prompt(prompt_path)
-    marked = load_marked(LABELLED_PATH)
-    saved = load_saved_entries(RESULT_PATH)
+    sheet_path = Path(os.environ.get(SHEET_ENV, str(LABELLED_PATH)))
+    result_path = Path(os.environ.get(RESULT_ENV, str(RESULT_PATH)))
+    marked = load_marked(sheet_path)
+    saved = load_saved_entries(result_path)
 
     pending = [review for review in marked if review["numero"] not in saved]
     already = len(marked) - len(pending)
@@ -374,11 +378,11 @@ def run() -> None:
     )
     print(f"Modelo: {config['model']} | prompt: {prompt_path.name}")
 
-    exam_version = sheet_version(LABELLED_PATH)
-    print(f"Hoja: sha256 {exam_version[:12]}")
+    exam_version = sheet_version(sheet_path)
+    print(f"Hoja: {sheet_path.name} | sha256 {exam_version[:12]}")
 
-    RESULT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with RESULT_PATH.open("a", encoding="utf-8") as result_file:
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    with result_path.open("a", encoding="utf-8") as result_file:
         for review in pending:
             judgments, problems, raw, milliseconds = measure_review(
                 config, prompt, review
