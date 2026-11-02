@@ -15,7 +15,7 @@ PROJECT = Path(__file__).resolve().parent.parent
 LABELLED_PATH = PROJECT / "labelled" / "reviews_to_label.json"
 RULES_PATH = PROJECT / "labelled" / "result_rules.json"
 SHEET_ENV = "COMIDILLA_SHEET"
-RESULT_ENV = "COMIDILLA_RESULT"
+RESULT_ENV = "COMIDILLA_RULES"
 
 POSITIVE = "positivo"
 NEGATIVE = "negativo"

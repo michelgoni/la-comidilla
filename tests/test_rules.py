@@ -205,7 +205,7 @@ class RunTest(unittest.TestCase):
             chosen = folder / "resultado.json"
             env = {
                 "COMIDILLA_SHEET": str(sheet),
-                "COMIDILLA_RESULT": str(chosen),
+                "COMIDILLA_RULES": str(chosen),
             }
             with mock.patch.dict(os.environ, env, clear=True), \
                     mock.patch.object(rules, "LABELLED_PATH", folder / "no.json"), \
