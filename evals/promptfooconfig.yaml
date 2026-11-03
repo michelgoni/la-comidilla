@@ -1,0 +1,15 @@
+# La Comidilla, step 1: the blind exam in promptfoo.
+#
+# One provider, one test set, no assertions yet: the automatic checks are step 2.
+# The prompt below is a pass-through. The real prompt is prompts/prompt_v4.txt
+# and the provider reads it from there, so the project keeps a single copy.
+description: "La Comidilla: 30 blind reviews, prompt v4, one pass"
+
+prompts:
+  - "{{texto}}"
+
+providers:
+  - id: file://provider.mjs
+    label: "claude-haiku-5-5 + prompt_v4"
+
+tests: file://dataset.jsonl

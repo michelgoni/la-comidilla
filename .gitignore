@@ -14,3 +14,8 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# promptfoo: the generated test set and the run output carry third-party
+# review texts in their vars, so they never enter the repository.
+evals/dataset.jsonl
+evals/results.json
