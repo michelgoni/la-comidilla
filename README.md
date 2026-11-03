@@ -75,6 +75,15 @@ Los fallos del modelo no son invenciones: son discusiones de etiqueta. De sus 19
 
 La medida anterior, con 20 reseñas, dio 94,2% de precisión y 87,5% de recuerdo. Esa hoja se revisó después de ver la respuesta del modelo (decisión 07), así que su precisión está inflada: con la hoja de antes de la revisión el modelo sacaba 69,2% y el rival 68,2%. Se queda como medida histórica y no es la que cuenta.
 
+## Esto es AI Engineering, no ML Engineering
+
+Cuatro líneas, para que no haya duda de dónde cae el trabajo:
+
+1. No entrené ningún modelo: usé uno ya entrenado y lo adapté cambiando el prompt cuatro veces; la cuarta es la que aguanta la medida.
+2. Construí solo la capa de arriba: los programas que dirigen al modelo y comparan su salida con las marcas, sin sistema propio de entrenamiento ni de servicio.
+3. Ese formato no evita el error, lo hace contable: de los 94 juicios que dio, 19 no están en mi hoja, y ninguno es texto inventado, son desacuerdos de etiqueta.
+4. Escribí un rival de reglas, sin modelo. Recuerdo es cuántos de mis 87 juicios encuentra: 75 el modelo (86,2%) y 36 el rival (41,4%). Precisión es cuántos de los que escribe están en mi hoja: 79,8% el modelo y 66,7% el rival, 13 puntos de diferencia.
+
 ## Dónde está cada cosa
 
 | Carpeta | Qué guarda |
